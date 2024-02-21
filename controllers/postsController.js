@@ -1,4 +1,5 @@
 const BlogPost = require('../models/BlogPost');
+const Comment = require('../models/Comment');
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 
@@ -9,9 +10,10 @@ exports.index_get = asyncHandler(async (req, res, next) => {
 });
 
 // All comments for a specific post
-exports.comments_get = (req, res, next) => {
-    res.send(`TODO: Implement GET for ALL comments for post: ${req.params.postID}`);
-}
+exports.comments_get = asyncHandler(async (req, res, next) => {
+    const comments = await Comment.find({parentPost: req.params.postID}).exec(); 
+    res.json(comments);
+});
 
 // Specific post
 exports.post_get = (req, res, next) => {
