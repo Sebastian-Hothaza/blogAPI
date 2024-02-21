@@ -16,9 +16,10 @@ exports.comments_get = asyncHandler(async (req, res, next) => {
 });
 
 // Specific post
-exports.post_get = (req, res, next) => {
-    res.send(`TODO: Implement GET for specific post: ${req.params.postID}`);
-}
+exports.post_get = asyncHandler(async(req, res, next) => {
+    const post = await BlogPost.findById(req.params.postID);
+    res.json(post)
+})
 exports.post_post = (req, res, next) => {
     res.send(`TODO: Implement POST for specific post: ${req.params.postID}`);
 }
@@ -31,9 +32,10 @@ exports.post_delete = (req, res, next) => {
 
 
 // Specific comment
-exports.comment_get = (req, res, next) => {
-    res.send(`TODO: Implement GET for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
-}
+exports.comment_get = asyncHandler(async (req, res, next) => {
+    const comment = await Comment.findById(req.params.commentID);
+    res.json(comment);
+});
 exports.comment_post = (req, res, next) => {
     res.send(`TODO: Implement POST for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
 }
