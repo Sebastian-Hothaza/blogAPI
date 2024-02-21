@@ -3,8 +3,17 @@ const express = require('express');
 const path = require('path');
 const indexRouter = require('./routes/index');
 const postsRouter = require('./routes/posts');
+require('dotenv').config();
 
 const app = express();
+
+// Set up mongoose connection
+const mongoose = require("mongoose");
+mongoose.set("strictQuery", false);
+main().catch((err) => console.log(err));
+async function main() { 
+  await mongoose.connect(process.env.MONGODB_URI);
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
