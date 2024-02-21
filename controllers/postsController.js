@@ -2,10 +2,11 @@ const BlogPost = require('../models/BlogPost');
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 
-// Home page - all posts
-exports.index_get = (req, res, next) => {
-    res.json({message: "HELLO WORLD"});
-};
+// Home page - retrieves all posts
+exports.index_get = asyncHandler(async (req, res, next) => {
+    const posts = await BlogPost.find().exec();   
+    res.json(posts);
+});
 
 // All comments for a specific post
 exports.comments_get = (req, res, next) => {
