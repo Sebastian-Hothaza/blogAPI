@@ -9,6 +9,10 @@ exports.index_get = asyncHandler(async (req, res, next) => {
     res.json(posts);
 });
 
+exports.index_post = asyncHandler(async (req, res, next) => {
+    res.send(`TODO: Implement POST for index`);
+});
+
 // All comments for a specific post
 exports.comments_get = asyncHandler(async (req, res, next) => {
     const comments = await Comment.find({parentPost: req.params.postID}).exec(); 
@@ -20,9 +24,6 @@ exports.post_get = asyncHandler(async(req, res, next) => {
     const post = await BlogPost.findById(req.params.postID);
     res.json(post)
 })
-exports.post_post = (req, res, next) => {
-    res.send(`TODO: Implement POST for specific post: ${req.params.postID}`);
-}
 exports.post_put = (req, res, next) => {
     res.send(`TODO: Implement PUT for specific post: ${req.params.postID}`);
 }
