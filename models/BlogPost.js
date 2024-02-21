@@ -3,7 +3,8 @@ const { DateTime } = require("luxon");
 
 const BlogPostSchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  password: { type: String, required: true, minLength: 6, maxLength: 20 },
+  title: { type: String, required: true, minLength: 6, maxLength: 20 },
+  content: { type: String, required: true, minLength: 10, maxLength: 200 },
   timestamp: {type: Date, required:true}
 });
 
