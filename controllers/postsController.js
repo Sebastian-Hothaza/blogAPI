@@ -19,8 +19,16 @@ function validateForm(req,res,next){
 async function validatePostId(req, res, next){
     if (!ObjectId.isValid(req.params.postID)) return res.status(404).send({msg: 'postID is not a valid ObjectID'});
     const postExists = await BlogPost.exists({_id: req.params.postID});
-    console.log(postExists);
     if (!postExists) return res.status(404).send({msg: 'Post does not exist'});
+    next();
+}
+
+// Called by middleware functions
+// Verify that the req.params.commentID is a valid objectID and that it exists in our DB
+async function validateCommentId(req, res, next){
+    if (!ObjectId.isValid(req.params.commentID)) return res.status(404).send({msg: 'commentID is not a valid ObjectID'});
+    const commentExists = await BlogPost.exists({_id: req.params.commentID});
+    if (!commentExists) return res.status(404).send({msg: 'Post does not exist'});
     next();
 }
 
@@ -107,38 +115,34 @@ exports.post_delete = [
 
 // Specific comment
 exports.comment_get = asyncHandler(async (req, res, next) => {
-    const comment = await Comment.findById(req.params.commentID);
-    res.json(comment);
+    if (ObjectId.isValid(req.params.commentID)){
+        const comment = await Comment.findById(req.params.commentID);
+        return res.json(comment)
+    }else{
+        return res.sendStatus(404);
+    } 
 });
 exports.comment_post = [
-    // Validate and sanitize the name field.
     body("name", "Name must contain at 3-20 characters").trim().isLength({ min: 3, max: 20}).escape(),
-    //TODO: Check other fields, plus check that the body contains the fields we need to build up our comment object
+    body("comment", "Comment must contain at 3-200 characters").trim().isLength({ min: 3, max: 200}).escape(),
+    validateForm,
+    validatePostId,  //Check that postID is a valid objectID AND that the object actually exists as it is used in parentPost property in the comment object we build below
 
-    // Process request after validation and sanitization
+    // Process request 
     asyncHandler(async (req, res, next) => {
-        // Extract the validation errors from a request.
-        const errors = validationResult(req);
-
         const comment = new Comment({
             name: req.body.name,
             comment: req.body.comment,
             parentPost: req.params.postID,
             timestamp: new Date()
         })
-
-        if (!errors.isEmpty()){
-            // There are errors
-            res.sendStatus(400);
-        }else{
-            // Request is valid, create entry in DB
-            await comment.save();
-            res.sendStatus(201);
-        }
-
+        await comment.save();
+        return res.sendStatus(201);
     })
 ]
 exports.comment_put = (req, res, next) => {
+    // NOTE: Augemtn or design new newlper to verify objectId typecast will be ok
+    // NOTE: Make sure parentPost is valid ObjectID
     res.send(`TODO: Implement PUT for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
 }
 exports.comment_delete = (req, res, next) => {
