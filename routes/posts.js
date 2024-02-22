@@ -36,7 +36,7 @@ function attachToken(req, res, next){
         next();
     }else{
         // Forbidden
-        res.sendStatus(403);
+        return res.status(400).send({msg: 'JWT Token missing'});
     }
 }
 

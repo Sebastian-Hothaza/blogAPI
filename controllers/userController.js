@@ -17,7 +17,7 @@ exports.login = [
     validateForm,
 
     // Form data is valid. Check that user exists in DB and that password matches
-    asyncHandler(async (req, res, _) => {
+    asyncHandler(async (req, res, next) => {
         const user = await User.findOne({name: req.body.name}).exec();
         if (user){
             // Verify Password
