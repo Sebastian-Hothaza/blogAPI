@@ -27,8 +27,8 @@ async function validatePostId(req, res, next){
 // Verify that the req.params.commentID is a valid objectID and that it exists in our DB
 async function validateCommentId(req, res, next){
     if (!ObjectId.isValid(req.params.commentID)) return res.status(404).send({msg: 'commentID is not a valid ObjectID'});
-    const commentExists = await BlogPost.exists({_id: req.params.commentID});
-    if (!commentExists) return res.status(404).send({msg: 'Post does not exist'});
+    const commentExists = await Comment.exists({_id: req.params.commentID});
+    if (!commentExists) return res.status(404).send({msg: 'Comment does not exist'});
     next();
 }
 
@@ -51,7 +51,7 @@ exports.post_get = asyncHandler(async(req, res, next) => {
         const post = await BlogPost.findById(req.params.postID);
         return res.json(post)
     }else{
-        return res.sendStatus(404);
+        return res.status(404).send({msg: 'postID is not a valid ObjectID'});
     } 
 })
 exports.index_post = [
@@ -119,7 +119,7 @@ exports.comment_get = asyncHandler(async (req, res, next) => {
         const comment = await Comment.findById(req.params.commentID);
         return res.json(comment)
     }else{
-        return res.sendStatus(404);
+        return res.status(404).send({msg: 'postID is not a valid ObjectID'});
     } 
 });
 exports.comment_post = [
@@ -140,13 +140,39 @@ exports.comment_post = [
         return res.sendStatus(201);
     })
 ]
-exports.comment_put = (req, res, next) => {
-    // NOTE: Augemtn or design new newlper to verify objectId typecast will be ok
-    // NOTE: Make sure parentPost is valid ObjectID
-    res.send(`TODO: Implement PUT for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
-}
-exports.comment_delete = (req, res, next) => {
-    res.send(`TODO: Implement DELETE for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
-}
+exports.comment_put = [
+    body("name", "Name must contain at 3-20 characters").trim().isLength({ min: 3, max: 20}).escape(),
+    body("comment", "Comment must contain at 3-200 characters").trim().isLength({ min: 3, max: 200}).escape(),
+    validateForm,
+    validatePostId, //Check that postID is a valid objectID AND that the object actually exists as it is used in parentPost property in the comment object we build below
+    validateCommentId, //Check that commentID is a valid objectID AND that the object actually exists so we can update it 
 
-
+    // Verify the token and process the request
+    (req, res, next) => {
+        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+            if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
+            // User is authenticated; we can edit the comment
+            const comment = new Comment({
+                name: req.body.name,
+                comment: req.body.comment,
+                parentPost: req.params.postID,
+                timestamp: new Date(),
+                _id: req.params.commentID
+            })
+            await Comment.findByIdAndUpdate(req.params.commentID, comment, {});
+            return res.sendStatus(201);
+        }))
+    },
+]
+exports.comment_delete = [
+    validatePostId, //Check that postID is a valid objectID AND that the object actually exists 
+    validateCommentId, //Check that commentID is a valid objectID AND that the object actually exists
+    (req,res,next)=>{
+        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+            if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
+            // User is authenticated; we can delete the comment
+            await Comment.findByIdAndDelete(req.params.commentID);
+            return res.sendStatus(200);
+        }))
+    },
+]
