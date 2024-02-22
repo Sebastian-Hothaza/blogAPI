@@ -4,39 +4,37 @@ const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const jwt = require('jsonwebtoken')
 
+// Called by middleware functions
+function validateForm(req,res,next){
+    const errors = validationResult(req); // Extract the validation errors from a request.
+    if (!errors.isEmpty())  return res.status(400).json(errors.mapped());
+    next();
+}
+
 // Home page - retrieves all posts
 exports.index_get = asyncHandler(async (req, res, next) => {
     const posts = await BlogPost.find().exec();   
-    res.json(posts);
+    return res.json(posts);
 });
 
 exports.index_post = [
-    // Validate and sanitize the title field.
     body("title", "Title must contain at 6-20 characters").trim().isLength({ min: 6, max: 20}).escape(),
     body("content", "Content must contain at 10-200 characters").trim().isLength({ min: 6, max: 200}).escape(),
-    //TODO: Check other fields, plus check that the body contains the fields we need to build up our post object
+    validateForm,
 
+    // Verify the token and process the request
     (req, res, next) => {
-        // Verify the token
         jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
-            if (err){
-                res.sendStatus(401);
-            }else{
-                // User is authenticated; we can create the post
-                const errors = validationResult(req); // Extract the validation errors from a request.
-                const post = new BlogPost({
-                    author: authData.user._id,
-                    title: req.body.title,
-                    content: req.body.content,
-                    timestamp: new Date(),
-                })
-                if (!errors.isEmpty()){ // There are errors
-                    res.status(400).json(errors.mapped()); 
-                }else{
-                    await post.save();
-                    res.sendStatus(201);
-                }
-            }
+            if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
+            // User is authenticated; we can create the post
+            const post = new BlogPost({
+                author: authData.user._id,
+                title: req.body.title,
+                content: req.body.content,
+                timestamp: new Date(),
+            })
+            await post.save();
+            return res.sendStatus(201);
         }))
     },
 ]
