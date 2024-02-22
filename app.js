@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const indexRouter = require('./routes/index');
 const postsRouter = require('./routes/posts');
+const cors = require('cors')
 require('dotenv').config();
 
 const app = express();
@@ -15,9 +16,9 @@ async function main() {
   await mongoose.connect(process.env.MONGODB_URI);
 }
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+// cors setup
+app.use(cors());
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
