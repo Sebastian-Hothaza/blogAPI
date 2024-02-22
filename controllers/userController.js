@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 exports.login = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({name: req.body.name}).exec(); // TODO: AUTHENTICATE USER by password (bcryptjs)
     if (user){
-        jwt.sign({user}, 'secret', (err, token) => {
+        jwt.sign({user}, process.env.SECRET_CODE, (err, token) => {
             res.json({
                 token
             });
