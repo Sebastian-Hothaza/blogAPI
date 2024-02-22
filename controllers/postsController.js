@@ -2,6 +2,7 @@ const BlogPost = require('../models/BlogPost');
 const Comment = require('../models/Comment');
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
+const jwt = require('jsonwebtoken')
 
 // Home page - retrieves all posts
 exports.index_get = asyncHandler(async (req, res, next) => {
@@ -9,9 +10,27 @@ exports.index_get = asyncHandler(async (req, res, next) => {
     res.json(posts);
 });
 
-exports.index_post = asyncHandler(async (req, res, next) => {
-    res.send(`TODO: Implement POST for index`);
-});
+exports.index_post = [
+    // Validate and sanitize the name field.
+    body("name", "Name must contain at 3-20 characters").trim().isLength({ min: 3, max: 20}).escape(),
+    //TODO: Check other fields, plus check that the body contains the fields we need to build up our post object
+
+    
+    asyncHandler(async (req, res, next) => {
+        // Verify the token
+        jwt.verify(req.token, 'secret', (err, authData) => {
+            if (err){
+                res.send(`FAILED! Token is: ${req.token}`);
+            }else{
+                res.send('Ok, you can post!')
+            }
+        })
+    }),
+]
+
+
+    
+
 
 // All comments for a specific post
 exports.comments_get = asyncHandler(async (req, res, next) => {
@@ -37,12 +56,39 @@ exports.comment_get = asyncHandler(async (req, res, next) => {
     const comment = await Comment.findById(req.params.commentID);
     res.json(comment);
 });
-exports.comment_post = (req, res, next) => {
-    res.send(`TODO: Implement POST for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
-}
+exports.comment_post = [
+    // Validate and sanitize the name field.
+    body("name", "Name must contain at 3-20 characters").trim().isLength({ min: 3, max: 20}).escape(),
+    //TODO: Check other fields, plus check that the body contains the fields we need to build up our comment object
+
+    // Process request after validation and sanitization
+    asyncHandler(async (req, res, next) => {
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        const comment = new Comment({
+            name: req.body.name,
+            comment: req.body.comment,
+            parentPost: req.params.postID,
+            timestamp: new Date()
+        })
+
+        if (!errors.isEmpty()){
+            // There are errors
+            res.sendStatus(400);
+        }else{
+            // Request is valid, create entry in DB
+            await comment.save();
+            res.sendStatus(201);
+        }
+
+    })
+]
 exports.comment_put = (req, res, next) => {
     res.send(`TODO: Implement PUT for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
 }
 exports.comment_delete = (req, res, next) => {
     res.send(`TODO: Implement DELETE for specific comment: ${req.params.commentID} on post ${req.params.postID}`);
 }
+
+

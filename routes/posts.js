@@ -4,7 +4,7 @@ const postsController = require('../controllers/postsController')
 
 // Home page - all posts 
 router.get('/', postsController.index_get);
-router.post('/', postsController.index_post);
+router.post('/', attachToken, postsController.index_post);
 
 // All comments for a specific post
 router.get('/:postID/comments', postsController.comments_get);
@@ -19,5 +19,27 @@ router.get('/:postID/comments/:commentID', postsController.comment_get);
 router.post('/:postID/comments/', postsController.comment_post);
 router.put('/:postID/comments/:commentID', postsController.comment_put);
 router.delete('/:postID/comments/:commentID', postsController.comment_delete);
+
+// Attaches token from request header to the request itself
+function attachToken(req, res, next){
+    // Get auth header value
+    const bearerHeader = req.headers['authorization'];
+    // Check if bearer is undefined
+    if (typeof(bearerHeader) !== 'undefined'){
+        // Split at the space
+        const bearer = bearerHeader.split(' '); // Turning into array
+        // Get token from array
+        const bearerToken = bearer[1];
+        // Set the token
+        req.token = bearerToken;
+        // Next Middleware
+        next();
+    }else{
+        // Forbidden
+        res.sendStatus(403);
+    }
+}
+
+
 
 module.exports = router;

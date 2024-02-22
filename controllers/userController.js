@@ -2,9 +2,20 @@ const User = require('../models/User');
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 
+const jwt = require('jsonwebtoken')
+
 // Log in page
 // Create and send back token
-exports.login = (req, res, next) => {
-    res.send(`TODO: Implement login POST request: ${req.body.password}`);
-};
+exports.login = asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({name: req.body.name}).exec(); // TODO: AUTHENTICATE USER by password (bcryptjs)
+    if (user){
+        jwt.sign({user}, 'secret', (err, token) => {
+            res.json({
+                token
+            });
+        });
+    }else{
+        res.sendStatus(406);
+    }
+});
 
