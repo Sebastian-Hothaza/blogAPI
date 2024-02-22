@@ -11,21 +11,34 @@ exports.index_get = asyncHandler(async (req, res, next) => {
 });
 
 exports.index_post = [
-    // Validate and sanitize the name field.
-    body("name", "Name must contain at 3-20 characters").trim().isLength({ min: 3, max: 20}).escape(),
+    // Validate and sanitize the title field.
+    body("title", "Title must contain at 6-20 characters").trim().isLength({ min: 6, max: 20}).escape(),
+    body("content", "Content must contain at 10-200 characters").trim().isLength({ min: 6, max: 200}).escape(),
     //TODO: Check other fields, plus check that the body contains the fields we need to build up our post object
 
-    
-    asyncHandler(async (req, res, next) => {
+    (req, res, next) => {
         // Verify the token
-        jwt.verify(req.token, 'secret', (err, authData) => {
+        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err){
-                res.send(`FAILED! Token is: ${req.token}`);
+                res.sendStatus(401);
             }else{
-                res.send('Ok, you can post!')
+                // User is authenticated; we can create the post
+                const errors = validationResult(req); // Extract the validation errors from a request.
+                const post = new BlogPost({
+                    author: authData.user._id,
+                    title: req.body.title,
+                    content: req.body.content,
+                    timestamp: new Date(),
+                })
+                if (!errors.isEmpty()){ // There are errors
+                    res.status(400).json(errors.mapped()); 
+                }else{
+                    await post.save();
+                    res.sendStatus(201);
+                }
             }
-        })
-    }),
+        }))
+    },
 ]
 
 
