@@ -71,7 +71,7 @@ exports.index_post = [
                 timestamp: new Date(),
             })
             await post.save();
-            return res.sendStatus(201);
+            return res.status(201).json({_id: post.id});
         }))
     },
 ]
@@ -94,7 +94,7 @@ exports.post_put = [
                 _id: req.params.postID
             })
             await BlogPost.findByIdAndUpdate(req.params.postID, post, {});
-            return res.sendStatus(201);
+            return res.status(201).json({_id: post.id});
         }))
     },
 ]
@@ -137,7 +137,7 @@ exports.comment_post = [
             timestamp: new Date()
         })
         await comment.save();
-        return res.sendStatus(201);
+        return res.status(201).json({_id: comment.id});
     })
 ]
 exports.comment_put = [
@@ -160,7 +160,7 @@ exports.comment_put = [
                 _id: req.params.commentID
             })
             await Comment.findByIdAndUpdate(req.params.commentID, comment, {});
-            return res.sendStatus(201);
+            return res.status(201).json({_id: comment.id});
         }))
     },
 ]
