@@ -65,7 +65,7 @@ exports.index_post = [
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});
             // User is authenticated; we can create the post
             const post = new BlogPost({
-                author: authData.user._id,
+                author: authData.id,
                 title: req.body.title,
                 content: req.body.content,
                 timestamp: new Date(),
@@ -87,7 +87,7 @@ exports.post_put = [
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can edit the post
             const post = new BlogPost({
-                author: authData.user._id,
+                author: authData.id,
                 title: req.body.title,
                 content: req.body.content,
                 timestamp: new Date(),
