@@ -25,10 +25,10 @@ exports.login = [
             if (passwordMatch){
                 jwt.sign({user}, process.env.SECRET_CODE, (err, token) => res.json({token}))
             }else{
-                return res.sendStatus(401)
+                return res.status(401).json({msg: 'Incorrect Password'});
             }  
         }else{
-            return res.status(400).send({msg: 'User not in DB'}); // User does not exist in the db
+            return res.status(400).json({msg: 'User not in DB'}); // User does not exist in the db
         }
     }),
 ]
