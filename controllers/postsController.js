@@ -56,7 +56,7 @@ exports.post_get = asyncHandler(async(req, res, next) => {
 })
 exports.index_post = [
     body("title", "Title must contain at 6-20 characters").trim().isLength({ min: 6, max: 20}).escape(),
-    body("content", "Content must contain at 10-200 characters").trim().isLength({ min: 6, max: 200}).escape(),
+    body("content", "Content must contain at 10-200 characters").trim().isLength({ min: 10, max: 200}).escape(),
     validateForm,
 
     // Verify the token and process the request
@@ -104,8 +104,8 @@ exports.post_delete = [
         jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can delete the post
-    
-            await BlogPost.findByIdAndDelete(req.params.postID);
+            // Also delete comments who have this postID as their parentPost
+            await Promise.all([Comment.deleteMany({parentPost: req.params.postID}), BlogPost.findByIdAndDelete(req.params.postID)])
             return res.sendStatus(200);
         }))
     }
