@@ -24,7 +24,7 @@ exports.login = [
             const passwordMatch = await bcrypt.compare(req.body.password, user.password)
             if (passwordMatch){
                 jwt.sign({id: user._id}, process.env.SECRET_CODE, (err, token) => {
-                    res.cookie([`JWT_TOKEN=${token}; secure; httponly; samesite=Strict;`,])
+                    res.cookie([`JWT_TOKEN=${token}; secure; httponly;`,])
                     res.json({name: user.name})
                 }) 
             }else{
