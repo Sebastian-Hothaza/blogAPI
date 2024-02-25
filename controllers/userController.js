@@ -23,7 +23,10 @@ exports.login = [
             // Verify Password
             const passwordMatch = await bcrypt.compare(req.body.password, user.password)
             if (passwordMatch){
-                jwt.sign({id: user._id}, process.env.SECRET_CODE, (err, token) => res.json({token, name: user.name})) // We want to leave the password out of the JWT token. No need to include it!
+                jwt.sign({id: user._id}, process.env.SECRET_CODE, (err, token) => {
+                    res.cookie([`JWT_TOKEN=${token}; secure; httponly; samesite=Strict;`,])
+                    res.json({name: user.name})
+                }) 
             }else{
                 return res.status(401).json({msg: 'Incorrect Password'});
             }  

@@ -1,8 +1,8 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const indexRouter = require('./routes/index');
-const postsRouter = require('./routes/posts');
+
+
 const cors = require('cors')
 require('dotenv').config();
 
@@ -22,9 +22,13 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
+const cookieParser = require('cookie-parser')
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ROUTER
+const indexRouter = require('./routes/index');
+const postsRouter = require('./routes/posts');
 app.use('/', indexRouter);
 app.use('/posts', postsRouter);
 

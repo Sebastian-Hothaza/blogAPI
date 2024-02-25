@@ -36,6 +36,7 @@ async function validateCommentId(req, res, next){
 // All posts
 exports.index_get = asyncHandler(async (req, res, next) => {
     const posts = await BlogPost.find().exec();   
+    res.cookie('tst','123');
     return res.json(posts);
 });
 
@@ -61,7 +62,7 @@ exports.index_post = [
 
     // Verify the token and process the request
     (req, res, next) => {
-        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+        jwt.verify(req.cookies.JWT_TOKEN, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});
             // User is authenticated; we can create the post
             const post = new BlogPost({
@@ -83,7 +84,7 @@ exports.post_put = [
 
     // Verify the token and process the request
     (req, res, next) => {
-        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+        jwt.verify(req.cookies.JWT_TOKEN, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can edit the post
             const post = new BlogPost({
@@ -101,7 +102,7 @@ exports.post_put = [
 exports.post_delete = [
     validatePostId,
     (req,res,next)=>{
-        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+        jwt.verify(req.cookies.JWT_TOKEN, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can delete the post
             // Also delete comments who have this postID as their parentPost
@@ -149,7 +150,7 @@ exports.comment_put = [
 
     // Verify the token and process the request
     (req, res, next) => {
-        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+        jwt.verify(req.cookies.JWT_TOKEN, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can edit the comment
             const comment = new Comment({
@@ -168,7 +169,7 @@ exports.comment_delete = [
     validatePostId, //Check that postID is a valid objectID AND that the object actually exists 
     validateCommentId, //Check that commentID is a valid objectID AND that the object actually exists
     (req,res,next)=>{
-        jwt.verify(req.token, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
+        jwt.verify(req.cookies.JWT_TOKEN, process.env.SECRET_CODE, asyncHandler(async (err, authData) => {
             if (err) return res.status(401).send({msg: 'JWT Validation Fail'});;
             // User is authenticated; we can delete the comment
             await Comment.findByIdAndDelete(req.params.commentID);
