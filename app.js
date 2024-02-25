@@ -18,7 +18,7 @@ async function main() {
 
 // cors setup
 app.use(cors({
-  origin: "https://hothaza-blogapi.fly.dev",  credentials: true,
+  origin: "https://hothaza-blogapi.netlify.app",  credentials: true,
 }));
 
 
