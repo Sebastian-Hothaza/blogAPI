@@ -36,7 +36,6 @@ async function validateCommentId(req, res, next){
 // All posts
 exports.index_get = asyncHandler(async (req, res, next) => {
     const posts = await BlogPost.find().exec();   
-    res.cookie('tst','123');
     return res.json(posts);
 });
 
