@@ -17,7 +17,9 @@ async function main() {
 }
 
 // cors setup
-app.use(cors());
+app.use(cors({
+  origin: "https://hothaza-blogapi.fly.dev",  credentials: true,
+}));
 
 
 app.use(express.json());
