@@ -12,7 +12,7 @@ function validateForm(req,res,next){
 }
 
 exports.login = [
-    body("name", "Title must not be empty").isLength({ min: 1}).escape(),
+    body("name", "Name must not be empty").isLength({ min: 1}).escape(),
     body("password", "Password must not be empty").isLength({ min: 1}).escape(),
     validateForm,
 
